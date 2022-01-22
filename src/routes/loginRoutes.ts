@@ -6,6 +6,24 @@ interface RequestWithBody extends Request {
 
 const router = Router();
 
+router.get("/", (req: Request, res: Response) => {
+  if (req.session?.loggedIn) {
+    res.send(`
+      <div>
+        <div>You are logged in!</div>
+        <a href="/logout">Logout</a>
+      </div>
+    `);
+  } else {
+    res.send(`
+    <div>
+      <div>You are not logged in!</div>
+      <a href="/login">Login</a>
+    </div>
+  `);
+  }
+});
+
 router.get("/login", (req: Request, res: Response) => {
   res.send(`
           <form method="POST">
@@ -24,11 +42,22 @@ router.get("/login", (req: Request, res: Response) => {
 
 router.post("/login", (req: RequestWithBody, res: Response) => {
   const { email, password } = req.body;
-  if (email) {
-    res.send(email);
+  if (
+    email &&
+    password &&
+    email === "hassan.khan@xord.com" &&
+    password === "password"
+  ) {
+    req.session = { loggedIn: true };
+    res.redirect("/");
   } else {
-    res.send("You must provide an email");
+    res.send("Invalid email or password");
   }
+});
+
+router.get("/logout", (req: RequestWithBody, res: Response) => {
+  req.session = undefined;
+  res.redirect("/");
 });
 
 export { router };
